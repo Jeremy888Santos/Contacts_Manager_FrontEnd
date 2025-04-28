@@ -1,6 +1,34 @@
 import React from 'react';
+import { useState } from 'react';
+import axios from 'axios';
+
 
 const SignUpScreen = () => {
+
+  const [nome, setNome] = useState('');
+  const [sobrenome, setSobrenome] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const handleRegister = async (e) => {
+    e.preventDefault();
+  
+    try {
+      const response = await axios.post('http://localhost:5000/users', {
+        nome,
+        sobrenome,
+        email,
+        password
+      });
+  
+      console.log('Usuário registrado:', response.data);
+      // Aqui você pode limpar os campos ou redirecionar para outra página
+    } catch (error) {
+      console.error('Erro no registro:', error.response?.data || error.message);
+      // Aqui pode exibir uma mensagem de erro para o usuário
+    }
+  };
+
   return (
     <div style={styles.generalContainer}>  
       <div style={styles.signUpContainer}>
@@ -15,6 +43,8 @@ const SignUpScreen = () => {
                   type="text" 
                   placeholder="Your Name" 
                   style={styles.input}
+                  value={nome}
+                  onChange={(e) => setNome(e.target.value)}
                 />
               </div>
               <div style={styles.inputField}>
@@ -23,6 +53,8 @@ const SignUpScreen = () => {
                   type="text" 
                   placeholder="Your Last Name" 
                   style={styles.input}
+                  value={sobrenome}
+                  onChange={(e) => setSobrenome(e.target.value)}
                 />
               </div>
             </div>
@@ -34,6 +66,8 @@ const SignUpScreen = () => {
               type="email" 
               placeholder="Your email" 
               style={styles.input}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
           </div>
 
@@ -43,11 +77,14 @@ const SignUpScreen = () => {
               type="password" 
               placeholder="Enter your password" 
               style={styles.input}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
             />
           </div>
 
           <button 
             style={styles.signUpButton}
+            onClick={handleRegister}
             onMouseOver={(e) => e.currentTarget.style.backgroundColor = styles.signUpButtonHover.backgroundColor}
             onMouseOut={(e) => e.currentTarget.style.backgroundColor = styles.signUpButton.backgroundColor}
           >
