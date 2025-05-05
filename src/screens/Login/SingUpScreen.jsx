@@ -1,10 +1,8 @@
-import React from 'react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
-
+import validator from 'validator';
 
 const SignUpScreen = () => {
-
   const [nome, setNome] = useState('');
   const [sobrenome, setSobrenome] = useState('');
   const [email, setEmail] = useState('');
@@ -12,7 +10,32 @@ const SignUpScreen = () => {
 
   const handleRegister = async (e) => {
     e.preventDefault();
-  
+
+    if (!nome.trim() || !sobrenome.trim()) {
+      alert('Nome e sobrenome são obrigatórios.');
+      return;
+    }
+
+    if (nome.length < 2) {
+      alert('O nome deve ter pelo menos 2 caracteres.');
+      return;
+    }
+
+    if (sobrenome.length < 2) {
+      alert('O sobrenome deve ter pelo menos 2 caracteres.');
+      return;
+    }
+
+    if (!validator.isEmail(email)) {
+      alert('Por favor, insira um e-mail válido.');
+      return;
+    }
+
+    if (!validator.isLength(password, { min: 6 })) {
+      alert('A senha deve ter no mínimo 6 caracteres.');
+      return;
+    }
+
     try {
       const response = await axios.post('http://localhost:5000/users', {
         nome,
@@ -20,28 +43,37 @@ const SignUpScreen = () => {
         email,
         password
       });
-  
+
       console.log('Usuário registrado:', response.data);
-      // Aqui você pode limpar os campos ou redirecionar para outra página
+      alert('Usuário registrado com sucesso!');
+      setNome('');
+      setSobrenome('');
+      setEmail('');
+      setPassword('');
+
     } catch (error) {
-      console.error('Erro no registro:', error.response?.data || error.message);
-      // Aqui pode exibir uma mensagem de erro para o usuário
+      if (error.response?.status === 409) {
+        alert('Este e-mail já está em uso. Tente outro.');
+      } else {
+        console.error('Erro no registro:', error.response?.data || error.message);
+        alert('Erro ao registrar. Tente novamente mais tarde.');
+      }
     }
   };
 
   return (
-    <div style={styles.generalContainer}>  
+    <div style={styles.generalContainer}>
       <div style={styles.signUpContainer}>
         <h1 style={styles.welcomeText}>Hi! Welcome to<br />Easy Manager</h1>
-        
-        <div style={styles.formContainer}>
+
+        <form style={styles.formContainer} onSubmit={handleRegister}>
           <div style={styles.inputGroup}>
             <div style={styles.doubleInputContainer}>
               <div style={styles.inputField}>
                 <label style={styles.label}>Name</label>
-                <input 
-                  type="text" 
-                  placeholder="Your Name" 
+                <input
+                  type="text"
+                  placeholder="Your Name"
                   style={styles.input}
                   value={nome}
                   onChange={(e) => setNome(e.target.value)}
@@ -49,9 +81,9 @@ const SignUpScreen = () => {
               </div>
               <div style={styles.inputField}>
                 <label style={styles.label}>Last Name</label>
-                <input 
-                  type="text" 
-                  placeholder="Your Last Name" 
+                <input
+                  type="text"
+                  placeholder="Your Last Name"
                   style={styles.input}
                   value={sobrenome}
                   onChange={(e) => setSobrenome(e.target.value)}
@@ -62,9 +94,9 @@ const SignUpScreen = () => {
 
           <div style={styles.inputGroup}>
             <label style={styles.label}>Email</label>
-            <input 
-              type="email" 
-              placeholder="Your email" 
+            <input
+              type="email"
+              placeholder="Your email"
               style={styles.input}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -73,43 +105,46 @@ const SignUpScreen = () => {
 
           <div style={styles.inputGroup}>
             <label style={styles.label}>Password</label>
-            <input 
-              type="password" 
-              placeholder="Enter your password" 
+            <input
+              type="password"
+              placeholder="Enter your password"
               style={styles.input}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
 
-          <button 
+          <button
+            type="submit"
             style={styles.signUpButton}
-            onClick={handleRegister}
-            onMouseOver={(e) => e.currentTarget.style.backgroundColor = styles.signUpButtonHover.backgroundColor}
-            onMouseOut={(e) => e.currentTarget.style.backgroundColor = styles.signUpButton.backgroundColor}
+            onMouseOver={(e) =>
+              (e.currentTarget.style.backgroundColor = styles.signUpButtonHover.backgroundColor)
+            }
+            onMouseOut={(e) =>
+              (e.currentTarget.style.backgroundColor = styles.signUpButton.backgroundColor)
+            }
           >
             Sign up
           </button>
 
           <p style={styles.signInText}>
             Already have an account?{' '}
-            <a 
-              href="#" 
+            <a
+              href="#"
               style={styles.signInLink}
-              onMouseOver={(e) => e.currentTarget.style.textDecoration = styles.signInLinkHover.textDecoration}
-              onMouseOut={(e) => e.currentTarget.style.textDecoration = styles.signInLink.textDecoration}
+              onMouseOver={(e) => (e.currentTarget.style.textDecoration = 'underline')}
+              onMouseOut={(e) => (e.currentTarget.style.textDecoration = 'none')}
             >
               Sign In
             </a>
           </p>
-        </div>
+        </form>
       </div>
-    </div>  
+    </div>
   );
 };
 
 const styles = {
-
   generalContainer: {
     display: 'flex',
     width: '100vw',
@@ -194,9 +229,6 @@ const styles = {
     color: '#333333',
     textDecoration: 'none',
     fontWeight: 'bold'
-  },
-  signInLinkHover: {
-    textDecoration: 'underline'
   }
 };
 
